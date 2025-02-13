@@ -1,133 +1,159 @@
 "use client"
-import { useCart } from "@/app/context/CartContext";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { BsCartDash } from "react-icons/bs";
-import WishlistIcon from "./WishlistIcon";
+import { useCart } from "@/app/context/CartContext"
+import Image from "next/image"
+import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
+import { BsCartDash } from "react-icons/bs"
+import WishlistIcon from "./WishlistIcon"
 
-const FeaturedProduct = ({ Featuredproducts }: { Featuredproducts: any[] }) => {
-
-  // Add TO Cart 
-
-   const { addToCart } = useCart();
-  
-    const handleAddToCart = (product: any) => {
-      console.log("Product data:", product); // Log the entire product object
-      addToCart({
-        id: product.slug, // Just use product.slug if it's already the string value
-        title: product.title,
-        price: product.price,
-        quantity: 1,
-        imageUrl: product.imageUrl,
-        color: ""
-      });
-    };
-
-  const [animatedProjects, setAnimatedProjects] = useState<string[]>([]);
-  const productRefs = useRef<(HTMLDivElement | null)[]>([]); // Ref to track elements
-
-  useEffect(() => {
-    // Creating Intersection Observer to watch elements
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const slug = entry.target.getAttribute("data-slug");
-          if (slug) {
-            setAnimatedProjects((prev) => [...prev, slug]); 
-          }
-        }
-      });
-    }, { threshold: 0.5 });
-
-    // Attach observer to each product
-    productRefs.current.forEach((product) => {
-      if (product) observer.observe(product);
-    });
-
-    return () => {
-      observer.disconnect(); // Clean up observer on unmount
-    };
-  }, [Featuredproducts]);
-
-  return (
-    <section className="w-full py-12">
-    <div className="max-w-[1440px] mx-auto">
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-[#272343] text-xl font-semibold mb-8 tracking-normal font-semibold">
-          Featured Product
-        </h2>
-        <div  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Featuredproducts.map((prod: any, index) => {
-            
-            return (
-              <>
-              {!prod.slug ? prod.slug = "no slug":(
-              <div
-                key={prod.slug}
-                ref={(el) => {
-                  // Properly assigning the ref to each product element
-                  if (el) productRefs.current[index] = el;
-                }}
-                data-slug={prod.slug}
-                className={`product md:w-[300px] sm:w-[245px] max-[400px]:w-[280px] h-[400px] mb-16 mt-5 hover:scale-105  ${
-                  animatedProjects.includes(prod.slug) ? "visible" : ""
-                }`}
-              >
-                <div className="img relative">
-                  <Link href={`/products/${prod.slug}`}>
-                    <img
-                      src={prod.imageUrl}
-                      alt={prod.title}
-                      className="w-[350px] h-[320px] hover:brightness-90 rounded-md object-cover"
-                    />
-                  </Link>
-                  {prod.color ? (
-                    <span
-                      className="absolute top-2 left-4 rounded-lg text-sm px-3 py-1"
-                      style={{ backgroundColor: prod.color, color: "white" }}
-                    >
-                      {prod.badge}
-                    </span>
-                  ):(<div>no color</div>)}                
-                </div>
-
-                <div className="flex items-center justify-between mt-3">
-                  <div className="text gap-[10px]">
-                    <h4 className="text-[#272343] text-xl font-semibold">{prod.title}</h4>
-                    <div>
-                      <span className="text-[#272343] text-xl font-medium">${prod.price}</span>
-                      {prod.priceWithoutDiscount && (
-                        <del className="ml-1 text-lg text-[#9A9CAA]">${prod.priceWithoutDiscount}</del>
-                      )}
-                    </div>
-                    <div>
-                      Reviews
-                    </div>
-                  </div>
-                   <div className="absolute top-2 right-6 rounded-lg size-4 ">
-                     <WishlistIcon product={{ ...prod, id: prod.slug || "default-id" }} />
-                   </div>
-                </div>
-                 <div>
-                  <button className="cart mt-3 w-full flex gap-5 py-3 items-center justify-center  bg-[#029FAE] hover:bg-[#272343] text-white rounded-lg" onClick={() => handleAddToCart(prod)}>
-                    <span className="text-lg">Add To Cart</span>
-                    <BsCartDash className="size-6" />
-                  </button>
-                 </div>
-
-              </div>
-            )}
-            </>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-    </section>
-  );
+interface Product {
+  slug: string
+  title: string
+  price: number
+  imageUrl: string
+  color: string
+  badge?: string
+  priceWithoutDiscount?: number
 }
 
-export default FeaturedProduct;
+interface featuredProduct {
+  slug: string
+  title: string
+  price: number
+  imageUrl: string
+  color: string
+  badge?: string
+  priceWithoutDiscount?: number
+}
 
+const FeaturedProduct = ({
+  Featuredproducts,
+}: {
+  Featuredproducts: featuredProduct[]
+}) => {
+  const { addToCart } = useCart()
 
-//  bg-[#F0F2F3]
+  const handleAddToCart = (product: Product) => {
+    console.log("Product data:", product)
+    addToCart({
+      id: product.slug,
+      title: product.title,
+      price: product.price,
+      quantity: 1,
+      imageUrl: product.imageUrl,
+      color: "",
+    })
+  }
+
+  const [animatedProjects, setAnimatedProjects] = useState<string[]>([])
+  const productRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const slug = entry.target.getAttribute("data-slug")
+            if (slug) {
+              setAnimatedProjects((prev) => [...prev, slug])
+            }
+          }
+        })
+      },
+      { threshold: 0.5 },
+    )
+
+    productRefs.current.forEach((product) => {
+      if (product) observer.observe(product)
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  return (
+    <section className="py-12 w-full">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1100px]">
+          <h2 className="mb-8 font-semibold  text-2xl tracking-normal">Featured Product</h2>
+          <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {Featuredproducts.map((Product, index) => {
+              if (!Product.slug) {
+                Product.slug = "no-slug"
+              }
+
+              return (
+                <Link href={`/products/${Product.slug}`} key={Product.slug || `product-${index}`}>
+                  <div
+                    ref={(el) => {
+                      if (el) productRefs.current[index] = el
+                    }}
+                    data-slug={Product.slug}
+                    className={`product mb-16 mt-5 hover:scale-105 transition-all duration-300 ${
+                      animatedProjects.includes(Product.slug) ? "visible" : ""
+                    }`}
+                  >
+                    <div className="relative img aspect-square">
+                      <Image
+                        src={Product.imageUrl}
+                        alt={Product.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        className="hover:brightness-90 rounded-md object-cover"
+                        priority={index < 4}
+                      />
+
+                      {Product.color && (
+                        <span
+                          className="top-2 left-4 absolute px-3 py-1 rounded-lg text-sm"
+                          style={{
+                            backgroundColor: Product.color,
+                            color: "white",
+                          }}
+                        >
+                          {Product.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between mt-3">
+                      <div>
+                        <h4 className="text-[#272343]">{Product.title}</h4>
+                        <div>
+                          <span className="text-[#272343] text-[18px] font-medium">{Product.priceWithoutDiscount}</span>
+                          <del className="ml-1 text-[#9A9CAA]">{Product.price}</del>
+                        </div>
+                      </div>
+                      <button
+                        className="cart px-3 py-2 bg-[#F0F2F3] hover:bg-[#029FAE] text-[#272343] hover:text-white rounded-lg transition-colors duration-300"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleAddToCart(Product)
+                        }}
+                      >
+                        <BsCartDash className="size-6" />
+                      </button>
+                    </div>
+
+                    <div className="top-2 right-7 absolute rounded-lg size-4">
+                      <WishlistIcon
+                        product={{
+                          ...Product,
+                          id: Product.slug || "default-id",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default FeaturedProduct
+
