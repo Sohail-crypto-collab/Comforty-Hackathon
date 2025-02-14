@@ -89,10 +89,7 @@ const Footer = async () => {
         </div>
        </div>
        {/* copyright */}
-       <div className="last flex lg:justify-between justify-center lg:px-20 py-2 lg:py-3 lg:text-sm text-[0.5rem] items-center">
-        <p className="text-[#9A9CAA]">@ 2024 - Blogy - Designed & Developed by <a className="text-[#272343]">Anila Waqar</a>  </p>
-        <img src="/footer-logo.png" alt="companies" className="xl:block hidden" />
-       </div>
+      
     </div>
   )
 }
